@@ -121,7 +121,7 @@ if calcular:
         elevaciones = np.array(elevaciones, dtype=float)
         dist_km = distancias_m / 1000.0
 
-        # -------------------- GRÁFICO --------------------
+                # -------------------- GRÁFICO --------------------
         fig, ax = plt.subplots(figsize=(9, 4))
         ax.plot(dist_km, elevaciones, linewidth=2)
         ax.set_xlabel("Distancia desde el punto inicial (km)")
@@ -130,35 +130,29 @@ if calcular:
         ax.grid(True, linestyle="--", alpha=0.5)
 
         st.pyplot(fig)
-
         st.success(f"Perfil calculado cada {paso_m} m entre {dist_inicio_km} y {dist_fin_km} km.")
         st.caption("Fuente de datos: elevation-tiles-prod (Terrarium, basado en SRTM / Copernicus)")
 
-st.pyplot(fig)
+        # --- Cálculo de Delta H excluyendo extremos 10% ---
+        valores_validos = [h for h in elevaciones if not np.isnan(h)]
+        n = len(valores_validos)
 
-st.success(f"Perfil calculado cada {paso_m} m entre {dist_inicio_km} y {dist_fin_km} km.")
-st.caption("Fuente de datos: elevation-tiles-prod (Terrarium, basado en SRTM / Copernicus)")
+        if n >= 10:
+            # Ordenar alturas y recortar 10% por cada extremo
+            valores_ordenados = np.sort(valores_validos)
+            corte = int(n * 0.10)
+            valores_filtrados = valores_ordenados[corte : n - corte]
 
-# --- Cálculo de Delta H excluyendo extremos 10% ---
-valores_validos = [h for h in elevaciones if not np.isnan(h)]
-n = len(valores_validos)
+            # Calcular Delta H
+            delta_h = np.max(valores_filtrados) - np.min(valores_filtrados)
 
-if n >= 10:
-    # Ordenar alturas y recortar 10% por cada extremo
-    valores_ordenados = np.sort(valores_validos)
-    corte = int(n * 0.10)
-    valores_filtrados = valores_ordenados[corte : n - corte]
+            # Mostrar resultados
+            st.subheader("Análisis del perfil")
+            st.write(f"Alturas analizadas: {len(valores_validos)}")
+            st.write(f"Alturas filtradas (80% central): {len(valores_filtrados)}")
+            st.write(f"**ΔH = {delta_h:.2f} m**")
 
-    # Calcular Delta H
-    delta_h = np.max(valores_filtrados) - np.min(valores_filtrados)
-
-    # Mostrar resultados
-    st.subheader("Análisis del perfil")
-    st.write(f"Alturas analizadas: {len(valores_validos)}")
-    st.write(f"Alturas filtradas (80% central): {len(valores_filtrados)}")
-    st.write(f"**ΔH = {delta_h:.2f} m**")
-
-    # Mostrar lista de las 60 alturas filtradas
-    st.text_area("Alturas filtradas (m)", "\n".join(f"{h:.2f}" for h in valores_filtrados), height=150)
-else:
-    st.warning("Muy pocos puntos válidos para calcular ΔH.")
+            # Mostrar lista de las 60 alturas filtradas
+            st.text_area("Alturas filtradas (m)", "\n".join(f"{h:.2f}" for h in valores_filtrados), height=150)
+        else:
+            st.warning("Muy pocos puntos válidos para calcular ΔH.")
