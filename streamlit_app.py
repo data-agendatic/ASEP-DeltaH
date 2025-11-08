@@ -29,16 +29,16 @@ if st.button("Calcular perfil"):
         dy = d * cos(radians(azimut)) / 110540  # latitud aproximada por metro
         lat_p = lat + dy
         lon_p = lon + dx
-
-    # Llamada a la API de Open-Meteo (global)
-    url = f"https://api.open-meteo.com/v1/elevation?latitude={lat_p}&longitude={lon_p}"
-    try:
-    r = requests.get(url, timeout=5)
-    data = r.json()
-    alt = data["elevation"][0] if "elevation" in data else np.nan
-    elevaciones.append(alt)
-    except Exception:
-    elevaciones.append(np.nan)
+ 
+        # Llamada a la API de Open-Meteo (global)
+        url = f"https://api.open-meteo.com/v1/elevation?latitude={lat_p}&longitude={lon_p}"
+        try:
+            r = requests.get(url, timeout=5)
+            data = r.json()
+            alt = data["elevation"][0] if "elevation" in data else np.nan
+            elevaciones.append(alt)
+        except Exception:
+            elevaciones.append(np.nan)
 
     # --- Gráfico ---
     fig, ax = plt.subplots(figsize=(10, 4))
