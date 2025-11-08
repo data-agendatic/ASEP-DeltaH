@@ -30,14 +30,15 @@ if st.button("Calcular perfil"):
         lat_p = lat + dy
         lon_p = lon + dx
 
-        # Llamada a la API de USGS
-        url = f"https://nationalmap.gov/epqs/pqs.php?x={lon_p}&y={lat_p}&units=Meters&output=json"
-        try:
-            r = requests.get(url, timeout=5)
-            alt = r.json()['USGS_Elevation_Point_Query_Service']['Elevation_Query']['Elevation']
-            elevaciones.append(alt)
-        except Exception as e:
-            elevaciones.append(np.nan)
+    # Llamada a la API de Open-Meteo (global)
+    url = f"https://api.open-meteo.com/v1/elevation?latitude={lat_p}&longitude={lon_p}"
+    try:
+    r = requests.get(url, timeout=5)
+    data = r.json()
+    alt = data["elevation"][0] if "elevation" in data else np.nan
+    elevaciones.append(alt)
+    except Exception:
+    elevaciones.append(np.nan)
 
     # --- Gráfico ---
     fig, ax = plt.subplots(figsize=(10, 4))
